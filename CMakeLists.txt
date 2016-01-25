@@ -42,7 +42,7 @@ set(INSTALL_BIN_DIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE INTERNAL "Installation d
 set(INSTALL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib" CACHE INTERNAL "Installation directory for libraries" FORCE)
 set(INSTALL_INC_DIR "${CMAKE_INSTALL_PREFIX}/include" CACHE INTERNAL "Installation directory for headers" FORCE)
 
-if(CMAKE_COMPILER_IS_GNUC)
+if(CMAKE_COMPILER_IS_GNUCC)
   if ("${CMAKE_C_COMPILER_VERSION}" VERSION_GREATER "4.8")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wno-implicit-function-declaration")
   endif()
