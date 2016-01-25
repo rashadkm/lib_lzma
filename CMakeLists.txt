@@ -42,6 +42,12 @@ set(INSTALL_BIN_DIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE INTERNAL "Installation d
 set(INSTALL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib" CACHE INTERNAL "Installation directory for libraries" FORCE)
 set(INSTALL_INC_DIR "${CMAKE_INSTALL_PREFIX}/include" CACHE INTERNAL "Installation directory for headers" FORCE)
 
+if(CMAKE_COMPILER_IS_GNUC)
+  if ("${CMAKE_C_COMPILER_VERSION}" VERSION_GREATER "4.8")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wno-implicit-function-declaration")
+  endif()
+endif()
+
 include(util)
 set(LZMA_MAJOR_VERSION -1)
 set(LZMA_MINOR_VERSION -1)
@@ -52,6 +58,7 @@ set(VERSION ${LZMA_MAJOR_VERSION}.${LZMA_MINOR_VERSION}.${LZMA_REV_VERSION})
 include(SuperFind)
 
 super_find_package(ICONV REPO "lib_iconv")
+include(${ICONV_INCLUDE_DIR})
 
 if(MSVC)
     if(CMAKE_C_COMPILER_VERSION VERSION_LESS "18.0.40629.0")
@@ -414,17 +421,22 @@ endif()
 report_version(${PROJECT_NAME} ${VERSION})    
 
 if(BUILD_SHARED_LIBS)
-    set(LIB_NAME ${PROJECT_NAME})
-    add_library(${LIB_NAME} SHARED ${SRCS} ${PUBLIC_HDRS} ${PRIVATE_HDRS} ${PUBLIC_LZMA_HDRS})
-    set_target_properties(${LIB_NAME} PROPERTIES DEFINE_SYMBOL LZMA_DLL)
-    set_target_properties(${LIB_NAME} PROPERTIES SOVERSION 1)
+  set(LIB_NAME ${PROJECT_NAME})
+  add_library(${LIB_NAME} SHARED ${SRCS} ${PUBLIC_HDRS} ${PRIVATE_HDRS} ${PUBLIC_LZMA_HDRS})
+  set_target_properties(${LIB_NAME} PROPERTIES DEFINE_SYMBOL LZMA_DLL)
+  set_target_properties(${LIB_NAME} PROPERTIES SOVERSION 1)
 else()    
-    set(LIB_NAME ${PROJECT_NAME}static)
-    add_library(${LIB_NAME} STATIC ${SRCS} ${PUBLIC_HDRS} ${PRIVATE_HDRS} ${PUBLIC_LZMA_HDRS})
-    set_target_properties(${LIB_NAME} PROPERTIES SOVERSION 1)
-endif()   
+  set(LIB_NAME ${PROJECT_NAME}static)
+  add_library(${LIB_NAME} STATIC ${SRCS} ${PUBLIC_HDRS} ${PRIVATE_HDRS} ${PUBLIC_LZMA_HDRS})
+  set_target_properties(${LIB_NAME} PROPERTIES SOVERSION 1)
+endif()
+  
+if(TARGET ICONV)
+   add_dependencies(${LIB_NAME} ICONV)
+endif()
 
-target_link_libraries(${LIB_NAME} ${ICONV_LIBRARIES}) 
+target_link_libraries(${LIB_NAME} ${ICONV_LIBRARIES})
+
 #target_link_extlibraries(${LIB_NAME})
 
 add_custom_target(uninstall COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
