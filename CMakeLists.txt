@@ -58,7 +58,7 @@ set(VERSION ${LZMA_MAJOR_VERSION}.${LZMA_MINOR_VERSION}.${LZMA_REV_VERSION})
 include(SuperFind)
 
 super_find_package(ICONV REPO "lib_iconv")
-include(${ICONV_INCLUDE_DIR})
+include_directories(${ICONV_INCLUDE_DIR})
 
 if(MSVC)
     if(CMAKE_C_COMPILER_VERSION VERSION_LESS "18.0.40629.0")
@@ -512,7 +512,7 @@ configure_file("${CMAKE_SOURCE_DIR}/cmake/${CMAKE_CONFIG_PREFIX}ConfigVersion.cm
 install(FILES
   "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${CMAKE_CONFIG_PREFIX}Config.cmake"
   "${CMAKE_BINARY_DIR}/${CMAKE_CONFIG_PREFIX}ConfigVersion.cmake"
-  DESTINATION ${DEF_INSTALL_CMAKE_DIR} )
+  DESTINATION ${INSTALL_CMAKE_DIR} )
 
 # Install the export set for use with the install-tree
 install(EXPORT ${CMAKE_EXPORT_TARGET_NAME} DESTINATION ${INSTALL_CMAKE_DIR})
