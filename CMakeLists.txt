@@ -29,7 +29,12 @@ cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
 project(lzma C)
 
 # some init settings
-set(CMAKE_COLOR_MAKEFILE ON)
+#set(CMAKE_COLOR_MAKEFILE ON)
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+option(BUILD_SHARED_LIBS  "Build shared libs." ON)
+
 # set path to additional CMake modules
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
@@ -44,21 +49,20 @@ set(LZMA_REV_VERSION -1)
 check_version(LZMA_MAJOR_VERSION LZMA_MINOR_VERSION LZMA_REV_VERSION)
 set(VERSION ${LZMA_MAJOR_VERSION}.${LZMA_MINOR_VERSION}.${LZMA_REV_VERSION})
 
-include(FindAnyProject)
-find_anyproject(ICONV)
+include(SuperFind)
 
-if(ICONV_FOUND)
-    set(HAVE_ICONV TRUE)
-endif()
+super_find_package(ICONV REPO "lib_iconv")
 
 if(MSVC)
     if(CMAKE_C_COMPILER_VERSION VERSION_LESS "18.0.40629.0")
         message(FATAL_ERROR "The compiled version is less than VC 2013 SP 5")
     endif()
-    
     add_definitions (-D_CRT_NONSTDC_NO_DEPRECATE -D_CRT_SECURE_NO_WARNINGS -D_CRT_NON_CONFORMING_SWPRINTFS -D_CRT_SECURE_NO_DEPRECATE)
 endif()
 
+add_definitions (-D_POSIX_C_SOURCE=199309L)
+add_definitions ("-Drestrict=__restrict__")
+  
 include(configure)
 
 configure_file(${CMAKE_MODULE_PATH}/cmake_uninstall.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake IMMEDIATE @ONLY)
@@ -420,9 +424,9 @@ else()
     set_target_properties(${LIB_NAME} PROPERTIES SOVERSION 1)
 endif()   
 
-target_link_extlibraries(${LIB_NAME}) 
+target_link_libraries(${LIB_NAME} ${ICONV_LIBRARIES}) 
+#target_link_extlibraries(${LIB_NAME})
 
-export(TARGETS ${LIB_NAME} FILE ${LIB_NAME}-exports.cmake EXPORT_LINK_INTERFACE_LIBRARIES)
 add_custom_target(uninstall COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 
 if(NOT CYGWIN)
@@ -430,21 +434,73 @@ if(NOT CYGWIN)
 endif()
 
 if(UNIX)
-    # On unix-like platforms the library is almost always called lib${PROJECT_NAME}
-    set_target_properties(${LIB_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
-    if(NOT APPLE AND BUILD_SHARED_LIBS)
-        set_target_properties(${LIB_NAME} PROPERTIES LINK_FLAGS "-Wl,--version-script,\"${CMAKE_CURRENT_SOURCE_DIR}/liblzma.map\"")
-    endif()
+  if(NOT APPLE AND BUILD_SHARED_LIBS)
+    set_target_properties(${LIB_NAME} PROPERTIES LINK_FLAGS "-Wl,--version-script,\"${CMAKE_CURRENT_SOURCE_DIR}/liblzma.map\"")
+  endif()
 endif()
 
-if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL )
-    install(TARGETS ${LIB_NAME} 
-        RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
-        ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
-        LIBRARY DESTINATION "${INSTALL_LIB_DIR}" )
-endif()
-if(NOT SKIP_INSTALL_HEADERS AND NOT SKIP_INSTALL_ALL )
-    install(FILES ${PUBLIC_HDRS} DESTINATION "${INSTALL_INC_DIR}")
-    install(FILES ${PUBLIC_LZMA_HDRS} DESTINATION "${INSTALL_INC_DIR}/lzma")
+set(CMAKE_CONFIG_PREFIX "LibLZMA")
+set(CMAKE_EXPORT_TARGET_NAME ${CMAKE_CONFIG_PREFIX}Targets)
+
+install(TARGETS ${LIB_NAME}
+  EXPORT ${CMAKE_EXPORT_TARGET_NAME}
+  RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
+  ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
+  LIBRARY DESTINATION "${INSTALL_LIB_DIR}" )
+
+install(FILES ${PUBLIC_HDRS} DESTINATION "${INSTALL_INC_DIR}")
+install(FILES ${PUBLIC_LZMA_HDRS} DESTINATION "${INSTALL_INC_DIR}/lzma")
+
+set(${CMAKE_CONFIG_PREFIX}_VERSION ${VERSION})
+
+string(TOLOWER ${CMAKE_CONFIG_PREFIX} CMAKE_CONFIG_PREFIX_)
+
+export(TARGETS ${LIB_NAME}
+  FILE "${CMAKE_BINARY_DIR}/${CMAKE_EXPORT_TARGET_NAME}.cmake")
+
+if(WIN32 AND NOT CYGWIN)
+  set(DEF_INSTALL_CMAKE_DIR cmake)
+else()
+  set(DEF_INSTALL_CMAKE_DIR lib/cmake/${CMAKE_CONFIG_PREFIX_})
 endif()
 
+set(INSTALL_CMAKE_DIR ${DEF_INSTALL_CMAKE_DIR} CACHE PATH
+  "Installation directory for CMake files")
+
+
+# Make relative paths absolute (needed later on)
+foreach(p LIB BIN INCLUDE CMAKE)
+  set(var INSTALL_${p}_DIR)
+  if(NOT IS_ABSOLUTE "${${var}}")
+    set(${var} "${CMAKE_INSTALL_PREFIX}/${${var}}")
+  endif()
+endforeach()
+
+set(CONFIG_TYPE "NOCONFIG")
+if(NOT "${CMAKE_BUILD_TYPE}" STREQUAL "")
+  string(TOUPPER ${CMAKE_BUILD_TYPE} CONFIG_TYPE)
+endif()
+
+file(RELATIVE_PATH REL_INCLUDE_DIR "${INSTALL_CMAKE_DIR}"
+  "${INSTALL_INC_DIR}")
+
+# ... for the build tree
+set(CONF_INCLUDE_DIRS "${CMAKE_BINARY_DIR}/lzma")
+configure_file("${CMAKE_SOURCE_DIR}/cmake/${CMAKE_CONFIG_PREFIX}Config.cmake.in"
+  "${CMAKE_BINARY_DIR}/${CMAKE_CONFIG_PREFIX}Config.cmake" @ONLY)
+
+# ... for the install tree
+set(CONF_INCLUDE_DIRS "\${INSTALL_CMAKE_DIR}/${REL_INCLUDE_DIR}")
+configure_file("${CMAKE_SOURCE_DIR}/cmake/${CMAKE_CONFIG_PREFIX}Config.cmake.in"
+  "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${CMAKE_CONFIG_PREFIX}Config.cmake" @ONLY)
+# ... for both
+configure_file("${CMAKE_SOURCE_DIR}/cmake/${CMAKE_CONFIG_PREFIX}ConfigVersion.cmake.in"
+  "${CMAKE_BINARY_DIR}/${CMAKE_CONFIG_PREFIX}ConfigVersion.cmake" @ONLY)
+ 
+install(FILES
+  "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${CMAKE_CONFIG_PREFIX}Config.cmake"
+  "${CMAKE_BINARY_DIR}/${CMAKE_CONFIG_PREFIX}ConfigVersion.cmake"
+  DESTINATION ${DEF_INSTALL_CMAKE_DIR} )
+
+# Install the export set for use with the install-tree
+install(EXPORT ${CMAKE_EXPORT_TARGET_NAME} DESTINATION ${INSTALL_CMAKE_DIR})
