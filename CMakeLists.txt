@@ -45,6 +45,8 @@ set(INSTALL_INC_DIR "${CMAKE_INSTALL_PREFIX}/include" CACHE INTERNAL "Installati
 if(CMAKE_COMPILER_IS_GNUCC)
   if ("${CMAKE_C_COMPILER_VERSION}" VERSION_GREATER "4.8")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wno-implicit-function-declaration")
+    add_definitions (-D_POSIX_C_SOURCE=199309L)
+    add_definitions ("-Drestrict=__restrict__") 
   endif()
 endif()
 
@@ -57,7 +59,8 @@ set(VERSION ${LZMA_MAJOR_VERSION}.${LZMA_MINOR_VERSION}.${LZMA_REV_VERSION})
 
 include(SuperFind)
 
-super_find_package(ICONV REPO "lib_iconv")
+#super_find_package(ICONV REPOSITORY_NAME "lib_iconv")
+super_find_package(ICONV)
 include_directories(${ICONV_INCLUDE_DIR})
 
 if(MSVC)
@@ -67,10 +70,6 @@ if(MSVC)
     add_definitions (-D_CRT_NONSTDC_NO_DEPRECATE -D_CRT_SECURE_NO_WARNINGS -D_CRT_NON_CONFORMING_SWPRINTFS -D_CRT_SECURE_NO_DEPRECATE)
 endif()
 
-if(NOT MSVC)
-  add_definitions (-D_POSIX_C_SOURCE=199309L)
-  add_definitions ("-Drestrict=__restrict__")
-endif()
 
 include(configure)
 
