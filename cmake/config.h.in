@@ -279,7 +279,7 @@
 #cmakedefine HAVE_WCWIDTH 1
 
 /* Define to 1 if the system has the type `_Bool'. */
-#cmakedefine HAVE__BOOL 1
+#cmakedefine HAVE__BOOL @HAVE__BOOL@
 
 /* Define to 1 if _mm_movemask_epi8 is available. */
 #cmakedefine HAVE__MM_MOVEMASK_EPI8 1
