@@ -435,7 +435,7 @@ else()
 endif()
   
 if(TARGET ICONV)
-   add_dependencies(${LIB_NAME} ICONV)
+  add_dependencies(${LIB_NAME} ICONV)
 endif()
 
 target_link_libraries(${LIB_NAME} ${ICONV_LIBRARIES})
@@ -443,7 +443,7 @@ target_link_libraries(${LIB_NAME} ${ICONV_LIBRARIES})
 add_custom_target(uninstall COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 
 if(NOT CYGWIN)
-    set_target_properties(${LIB_NAME} PROPERTIES VERSION ${VERSION})
+  set_target_properties(${LIB_NAME} PROPERTIES VERSION ${VERSION})
 endif()
 
 if(UNIX)
@@ -498,7 +498,7 @@ file(RELATIVE_PATH REL_INCLUDE_DIR "${INSTALL_CMAKE_DIR}"
   "${INSTALL_INC_DIR}")
 
 # ... for the build tree
-set(CONF_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/lzma" "${CMAKE_BINARY_DIR}")
+set(CONF_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/lzma" "${CMAKE_BINARY_DIR}/lzma")
 configure_file("${CMAKE_SOURCE_DIR}/cmake/${CMAKE_CONFIG_PREFIX}Config.cmake.in"
   "${CMAKE_BINARY_DIR}/${CMAKE_CONFIG_PREFIX}Config.cmake" @ONLY)
 
