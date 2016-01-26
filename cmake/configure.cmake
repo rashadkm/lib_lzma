@@ -412,6 +412,6 @@ set(PACKAGE_URL "http://tukaani.org/xz/")
 
 add_definitions(-DHAVE_CONFIG_H)
 
-configure_file(${CMAKE_SOURCE_DIR}/cmake/config.h.in ${CMAKE_BINARY_DIR}/lzmaconfig.h IMMEDIATE @ONLY)
+configure_file(${CMAKE_SOURCE_DIR}/cmake/config.h.in ${CMAKE_BINARY_DIR}/lzma/config.h IMMEDIATE @ONLY)
 
 

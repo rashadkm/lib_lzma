@@ -74,6 +74,9 @@ include(configure)
 
 configure_file(${CMAKE_MODULE_PATH}/cmake_uninstall.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake IMMEDIATE @ONLY)
 
+#for config.h
+include_directories ( ${CMAKE_BINARY_DIR}/lzma )
+
 include_directories ( ${CMAKE_SOURCE_DIR} )
 include_directories ( ${CMAKE_SOURCE_DIR}/api )
 include_directories ( ${CMAKE_SOURCE_DIR}/check )
@@ -83,7 +86,7 @@ include_directories ( ${CMAKE_SOURCE_DIR}/lz )
 include_directories ( ${CMAKE_SOURCE_DIR}/lzma )
 include_directories ( ${CMAKE_SOURCE_DIR}/rangecoder )
 include_directories ( ${CMAKE_SOURCE_DIR}/simple )
-include_directories ( ${CMAKE_BINARY_DIR} )
+
 
 set(PUBLIC_HDRS
     api/lzma.h
@@ -107,7 +110,7 @@ set(PUBLIC_LZMA_HDRS
 )
 
 set(PRIVATE_HDRS
-    ${CMAKE_CURRENT_BINARY_DIR}/lzmaconfig.h
+    ${CMAKE_CURRENT_BINARY_DIR}/lzma/config.h
     sysdefs.h
 	common/block_buffer_encoder.h
 	common/block_encoder.h
