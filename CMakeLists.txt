@@ -67,9 +67,11 @@ if(MSVC)
     add_definitions (-D_CRT_NONSTDC_NO_DEPRECATE -D_CRT_SECURE_NO_WARNINGS -D_CRT_NON_CONFORMING_SWPRINTFS -D_CRT_SECURE_NO_DEPRECATE)
 endif()
 
-add_definitions (-D_POSIX_C_SOURCE=199309L)
-add_definitions ("-Drestrict=__restrict__")
-  
+if(NOT MSVC)
+  add_definitions (-D_POSIX_C_SOURCE=199309L)
+  add_definitions ("-Drestrict=__restrict__")
+endif()
+
 include(configure)
 
 configure_file(${CMAKE_MODULE_PATH}/cmake_uninstall.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake IMMEDIATE @ONLY)
