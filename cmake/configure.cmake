@@ -410,6 +410,8 @@ set(PACKAGE_VERSION ${VERSION})
 set(PACKAGE_STRING "${PACKAGE_NAME} ${PACKAGE_VERSION}")
 set(PACKAGE_URL "http://tukaani.org/xz/")
 
-configure_file(${CMAKE_MODULE_PATH}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h IMMEDIATE @ONLY)
-add_definitions(-DHAVE_CONFIG_H) 
+add_definitions(-DHAVE_CONFIG_H)
+
+configure_file(${CMAKE_SOURCE_DIR}/cmake/config.h.in ${CMAKE_BINARY_DIR}/lzmaconfig.h IMMEDIATE @ONLY)
+
 
