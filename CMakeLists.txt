@@ -59,7 +59,6 @@ set(VERSION ${LZMA_MAJOR_VERSION}.${LZMA_MINOR_VERSION}.${LZMA_REV_VERSION})
 
 include(SuperFind)
 
-#super_find_package(ICONV REPOSITORY_NAME "lib_iconv")
 super_find_package(ICONV)
 include_directories(${ICONV_INCLUDE_DIR})
 
@@ -75,16 +74,16 @@ include(configure)
 
 configure_file(${CMAKE_MODULE_PATH}/cmake_uninstall.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake IMMEDIATE @ONLY)
 
-include_directories ( ${CMAKE_CURRENT_SOURCE_DIR} )
-include_directories ( ${CMAKE_CURRENT_SOURCE_DIR}/api )
-include_directories ( ${CMAKE_CURRENT_SOURCE_DIR}/check )
-include_directories ( ${CMAKE_CURRENT_SOURCE_DIR}/common )
-include_directories ( ${CMAKE_CURRENT_SOURCE_DIR}/delta )
-include_directories ( ${CMAKE_CURRENT_SOURCE_DIR}/lz )
-include_directories ( ${CMAKE_CURRENT_SOURCE_DIR}/lzma )
-include_directories ( ${CMAKE_CURRENT_SOURCE_DIR}/rangecoder )
-include_directories ( ${CMAKE_CURRENT_SOURCE_DIR}/simple )
-include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
+include_directories ( ${CMAKE_SOURCE_DIR} )
+include_directories ( ${CMAKE_SOURCE_DIR}/api )
+include_directories ( ${CMAKE_SOURCE_DIR}/check )
+include_directories ( ${CMAKE_SOURCE_DIR}/common )
+include_directories ( ${CMAKE_SOURCE_DIR}/delta )
+include_directories ( ${CMAKE_SOURCE_DIR}/lz )
+include_directories ( ${CMAKE_SOURCE_DIR}/lzma )
+include_directories ( ${CMAKE_SOURCE_DIR}/rangecoder )
+include_directories ( ${CMAKE_SOURCE_DIR}/simple )
+include_directories ( ${CMAKE_BINARY_DIR} )
 
 set(PUBLIC_HDRS
     api/lzma.h
@@ -108,7 +107,7 @@ set(PUBLIC_LZMA_HDRS
 )
 
 set(PRIVATE_HDRS
-    ${CMAKE_CURRENT_BINARY_DIR}/config.h
+    ${CMAKE_CURRENT_BINARY_DIR}/lzmaconfig.h
     sysdefs.h
 	common/block_buffer_encoder.h
 	common/block_encoder.h
@@ -438,8 +437,6 @@ endif()
 
 target_link_libraries(${LIB_NAME} ${ICONV_LIBRARIES})
 
-#target_link_extlibraries(${LIB_NAME})
-
 add_custom_target(uninstall COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 
 if(NOT CYGWIN)
@@ -498,7 +495,7 @@ file(RELATIVE_PATH REL_INCLUDE_DIR "${INSTALL_CMAKE_DIR}"
   "${INSTALL_INC_DIR}")
 
 # ... for the build tree
-set(CONF_INCLUDE_DIRS "${CMAKE_BINARY_DIR}/lzma")
+set(CONF_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/lzma" "${CMAKE_BINARY_DIR}")
 configure_file("${CMAKE_SOURCE_DIR}/cmake/${CMAKE_CONFIG_PREFIX}Config.cmake.in"
   "${CMAKE_BINARY_DIR}/${CMAKE_CONFIG_PREFIX}Config.cmake" @ONLY)
 
