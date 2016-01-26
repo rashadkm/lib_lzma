@@ -142,7 +142,7 @@
 #ifdef HAVE_STDBOOL_H
 #	include <stdbool.h>
 #else
-#	if ! HAVE__BOOL
+#	if !defined(HAVE__BOOL)
 typedef unsigned char _Bool;
 #	endif
 #	define bool _Bool

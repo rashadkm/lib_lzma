@@ -283,11 +283,13 @@ option(HAVE_SMALL "Check if small size is preferred over speed" OFF)
 option(ENABLE_THREADS "Enable threading support" ON)
 # default is on but no code to build assembler crc32_x86.S via libtool  
 option(ENABLE_ASSEMBLER "Enable assembler optimizations" OFF)
-    
+
 check_include_files(stdbool.h HAVE_STDBOOL_H)
 if(NOT HAVE_STDBOOL_H)
-  check_type_size(_Bool _BOOL)
-endif()    
+  set(HAVE__BOOL 0)
+else()
+  set(HAVE__BOOL 1)
+endif()
    
 check_include_files("stdint.h" HAVE_STDINT_H)
 check_include_files("stdlib.h" HAVE_STDLIB_H)
